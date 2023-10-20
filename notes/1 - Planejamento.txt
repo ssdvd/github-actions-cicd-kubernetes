@@ -1,0 +1,6 @@
+planejamento:
+
+iremos mover nosso app anteriormente que estava no ecs, para o eks tornando assim
+um cluste livre de um software proprietario e tornando possivel o uso de multi cloud
+e as vantagem nisso e a simplicidade na migracao entre provedores, maior resistencia a
+falhas, facil organizacao do servico com pods, interligacao entre provedores.
