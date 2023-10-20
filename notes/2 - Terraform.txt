@@ -1,0 +1,74 @@
+repositorio infra:
+
+teremos que clonar o repo do prof do curso para provisionar a infra necessaria para
+o cluster, e devemos nos atentar que no arquivo de infra dele dentro do backend do s3
+temos que alterar para o nosso bucket e a nossa regiao, para que assim o estado do
+terraform fique salvo no s3. e incluimos o seguinte comando na rotina:
+
+      - run: git clone https://github.com/leollo98/Infra_CI_Kubernetes.git
+
+
+esse comando ira clonar o repo de infra do qual devemos modificar o arquivo de backend.tf
+para o nosso bucket. Umas das forma e copiar o repo para o nosso usuario do github
+criando um repo novo com base nesse, e assim alterarmos o que for preciso e em seguida
+colocar o clone com o link do nosso repo. tambem podemos fazer o fork desse repo.
+assim o comando ficara da seguinte maneira:
+
+- run: git clone https://github.com/ssdvd/Infra_CI_Kubernetes.git
+
+preparando o terraform:
+
+e para preparar o ambiente terraform dentro dessa rotina, iremos fazer parecido com
+o que fizemos para o nosso loadtest, iremos criar uma rotina em que preparamos o 
+setup do terraform e em seguinda iremos iniciar o nosso repo do terraform, da seguinte
+maneira:
+
+      - name: HashiCorp - Setup Terraform
+        uses: hashicorp/setup-terraform@v2.0.3
+
+      - run: terraform -chdir=Infra_CI_Kubernetes/env/Homolog init
+
+aqui estamos preparando o ambiente com o terraform, e no segundo comando estamos
+iniciando o nosso repo do terraform do qual foi clonado por git. aqui nos atentamos
+que o caminho para inicializar o terraform e diferente, entao temos que atualizar
+o caminho para o diretorio do terraform.
+
+utilizando o terraform:
+
+apois inicializar o repo do terraform, podemos utilizar o comando apply, para podermos
+provisionar nossa infra, e com os seguintes comandos:
+
+      - run: terraform -chdir=Infra_CI_Kubernetes/env/Homolog destroy auto-approve
+
+      - run: terraform -chdir=Infra_CI_Kubernetes/env/Homolog apply auto-approve
+
+no primeiro comando estamos pedindo para que destrua toda a infra, caso tenhamos rodado
+a rotina antes, essse comando ira destruir o que nao era pra estar ali, em seguinda
+estamos executando o apply para que de fato inicie o provisionamento da infra. estamos
+utilizando o auto-approve nos comandos para que o mesmo nao fique travado, ja que
+em ambos os comandos sao necessario confirmacao. e esse auto-approve confirma no 
+nosso lugar.
+
+feito isso, podemos alterar o nosso arquivo principal das nossa rotinas, que e o go.yml
+e nele iremos comentar a rotina do deploy_ec2 e do loadtest, ja que por enquanto nao
+iremos utilizar essa rotina, e adicionando a rotina do eks, da seguinte forma:
+
+  deploy_eks: # NOME DA TAREFA 
+    needs: docker # E EXETCUTADA SO DEPOIS DA TASK docker FOR CONCLUIDA
+    uses: ./.github/workflows/eks.yml #ARQUIVO QUE SERA UTILIZADO
+    secrets: inherit # VAI HERDAR OS SECRETS DO REPO
+
+da mesma forma em que criamos as outra rotinas, iremos criar a do eks, mudando somente 
+o nome e o arquivo que sera chamado. Feito isso a rotina sera concluida com sucesso
+e ainda criar o nosso cluster para o eks. 
+
+Nessa aula, você aprendeu como:
+
+Instalar o terraform, a ferramenta que será utilizada para preparar a infraestrutura 
+automaticamente, permitindo a criação do cluster, banco de dados e balanceador de 
+carga automaticamente;
+
+Configurar o terraform, iniciando todas as configurações e baixando as bibliotecas 
+utilizando o init;
+
+sar o terraform destroy para apagar a infraestrutura, reduzidos os custos deste curso.

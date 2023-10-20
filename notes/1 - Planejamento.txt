@@ -4,3 +4,46 @@ iremos mover nosso app anteriormente que estava no ecs, para o eks tornando assi
 um cluste livre de um software proprietario e tornando possivel o uso de multi cloud
 e as vantagem nisso e a simplicidade na migracao entre provedores, maior resistencia a
 falhas, facil organizacao do servico com pods, interligacao entre provedores.
+
+preparando a rotina:
+
+e para iniciarmos a rotina, podemos pegar um trecho do arquivo da rotina de loadtest,
+podemos utilizar o primeiro job, onde realizamos a preparacao do repo e a 
+autenticacao na aws, com o seguinte bloco de cod:
+
+# NOME DA ROTINA
+name: kubernetes
+
+# QUANDO SERÁ EXECUTADO: NA CHAMADA DO ARQUIVO
+on:
+  workflow_call:
+
+# TAREFAS
+jobs:
+   kubernetes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Autenticando credenciais AWS
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+
+
+aqui estamos nomeando a rotina de kubernetes, onde somente sera executada se for chamada
+por outra rotina(on:), e no job estamos nomeando a rotina como kubernetes, e os passos
+que estamos seguido sao, o de preparar o nosso repo e realizar a autenticacao na AWS,
+feito isso podemos iniciar.
+
+Nessa aula, você aprendeu :
+
+O que é o kubernetes e sua importância: é um dos maiores orquestradores de 
+contêineres atualmente, tendo um grande suporte por parte de múltiplos provedores 
+de nuvem;
+
+Quais são as vantagens do kubernetes, sendo as principais: sua resiliência a falhas
+e a organização dos containers em pods, o que permite que aplicações com múltiplos
+contêineres possam ser executadas sem preocupações.
