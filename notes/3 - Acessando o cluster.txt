@@ -1,0 +1,61 @@
+preparando o kubectl:
+
+para prepararmos o kubectl na nossa rotina, podemos utilizar um rotina pronta dentro
+do marketplace do github, e pegar o codigo dessa rotina e implantar no nosso job,
+assim preparando o kubectl assim como fizeram para o terraform:
+
+
+      - name: Kubectl tool installer
+        uses: Azure/setup-kubectl@v3
+
+com esse trecho de codigo, ja preparamos o kubectl para o uso dentro da nossa rotina,
+tendo agora que somente utilizar os comandos.
+
+Conexao com o cluster:
+
+primeiro para realizar a conexao com o cluster, devemos primeiro obter o arquivo
+kubeconfig, e para obter esse arquivo temos que rodar o seguinte comando dentro
+da rotina:
+
+aws sts get-caller-identity
+
+aqui, estamos obtendo o arquivo, assim podemos dar continuidade com a conexao.
+E o requisitos para que esse comando rode e que tenhamos um cluster ativo e o 
+kubectl preparado na instancia da rotina. esse arquivo ira conter todas as informacoes
+necessarias para a conexao com o cluster, como endereco, cluster, credenciais.
+
+dados do cluster:
+
+e para obter os dados do cluster para o arquivo kubeconfig, devemos executar o seguinte
+comando:
+
+- run: aws eks update-kubeconfig --region us-east-2 --name homolog2
+
+aqui estamos executando um comando usando o aws cli, com o servico do eks, onde
+queremos criar ou atualizar o nosso arquivo kubeconfig, onde estamos dizendo a regiao
+em que estamos trabalhando e junto a isso o nome do cluster que queremos obter as
+informacoes.
+
+testando a conexao:
+
+e para testarmos a conexao com o arquivo recem criado, devemos executar o seguinte
+comando:
+
+kubectl get svc
+
+e se conseguirmos conexao com o cluster, significa que conseguimos e esta tudo funcionando
+e esperado a saida com a informacao do nome, tipo, ip do cluster. Se nao retornar essas
+informacoes temos que verificar se ha algum erro na rotina.
+
+Nessa aula, você aprendeu como:
+
+Instalar o kubectl na rotina, utilizando uma outra rotina do marketplace fornecida 
+pela Azure, deixando ele pronto para se comunicar com o cluster;
+
+Conectar o kubectl com o cluster no EKS, utilizando os comandos disponibilizados 
+pela AWS, possibilitando a comunicação entre o kubectl e o Kubernetes que está 
+sendo executado no cluster;
+
+Verificar a conexão do kubeclt com o cluster, tendo a certeza que todos os comandos 
+foram executados corretamente e que podemos continuar com as mudanças que vamos 
+realizar.
