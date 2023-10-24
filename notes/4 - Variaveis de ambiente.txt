@@ -1,0 +1,65 @@
+segredos no kubernetes:
+
+os segredos do kubernetes funcionam do mesmo jeito que no github actions, e diferente
+dele temos tipos de segredos, chave de acesso, generico ou opaco.
+
+os chave de acesso servem para chaves de ssh ou dados de TSL e o generico ou opaco 
+guardam qualquer tipo de valor.
+
+e podemos utilizamos como variaveis de ambiente, como ja estamos acostumados a fazer 
+ou entao podemos usar pastas e arquivos, como volumes.
+
+temos que tomar cuidados ja que esses dados nao possue criptografia e tambem e possivel
+recuperar os valores dessas variaveis. Tomar cuidado com containers de terceiros.
+
+recomendavel tomar providencias e trabalharmos com o minimo de permissao possivel.
+
+Criando segredos:
+
+e para criamos os segredos no kubectl, devemos executar os seguintes comandos:
+
+      - run: kubectl create secret generic dbhost --from-literal=HOST=
+      - run: kubectl create secret generic dbport --from-literal=DBPORT=
+      - run: kubectl create secret generic dbuser --from-literal=USER=
+      - run: kubectl create secret generic dbpassword --from-literal=PASSWORD=
+      - run: kubectl create secret generic dbname --from-literal=DBNAME=
+      - run: kubectl create secret generic port --from-literal=PORT=
+
+aqui estamos criando um segredo para cada variaveis que temos no secrets do nosso repo
+que sao responsaveis para a execucao do app, em kubectl create secret generic significa 
+que iremos criar uma secret do tipo genirica, em seguida definimos o nome no caso do
+primeiro comando e dbhost, da qual ira receber o valor com o HOST, em --from-literal=HOST
+estamos dizendo que esse secret tera que procurar no arquivo de kubernetes go.yml no 
+nosso repo de infra ci kubernetes, o secret com o nome de host, e depois desse parametro
+colocamos o = para inserir o valor que recebera as secrets do repo.
+
+segredos automaticos:
+
+E para inserirmos os valores das secret do nosso repo no github actions dentro do 
+kubectl, podemos fazer o seguinte:
+
+      - run: kubectl create secret generic dbhost --from-literal=HOST=${{secrets.DBHOST}}
+      - run: kubectl create secret generic dbport --from-literal=DBPORT=${{secrets.DBPORT}}
+      - run: kubectl create secret generic dbuser --from-literal=USER=${{secrets.DBUSER}}
+      - run: kubectl create secret generic dbpassword --from-literal=PASSWORD=${{secrets.DBPASSWORD}}
+      - run: kubectl create secret generic dbname --from-literal=DBNAME=${{secrets.DBNAME}}
+      - run: kubectl create secret generic port --from-literal=PORT=8000
+
+assim colocando o nosso secrets do repo no final, inserindo o valor que desejamos com
+seguranca. e para que nao termos que rodar essa rotina mais de uma vez, quando o nome
+do host do banco de dados da aws mudar, podemos fazer o seguinte:
+
+- run: echo "$(terraform -chdir=Infra_CI_Kubernetes/env/Homolog apply output -raw IP_db)"
+id: URL 
+
+inserimos esse comando, apos o provisionamento da infra, onde ira executar o comando echo
+e em seguida ira executa o comando dentro de "$()", assim imprimindo a saida do nosso comando 
+como uma string, pronta para ser armazenada. Adicionamos o id com o nome de url, para
+podermos utilizar a saida do comando na nossa secret criada no kubectl, da seguinte forma:
+
+      - run: kubectl create secret generic dbhost --from-literal=HOST=${{steps.URL.outputs.stdout}}
+
+assim que todas as vezes que executarmos essas rotina, o nome do host sempre estara atualizado
+assim nao tendo erro na execucao da rotina e seus seguintes passos. isso e possivel gracas ao
+id que demos para o comando que roda o output do IP_db, e inserindo o valor como 
+${{steps.URL.outputs.stdout}}, com a saida padrao do passo que e a stdout.
