@@ -63,3 +63,14 @@ assim que todas as vezes que executarmos essas rotina, o nome do host sempre est
 assim nao tendo erro na execucao da rotina e seus seguintes passos. isso e possivel gracas ao
 id que demos para o comando que roda o output do IP_db, e inserindo o valor como 
 ${{steps.URL.outputs.stdout}}, com a saida padrao do passo que e a stdout.
+
+Nessa aula, você aprendeu:
+O que são os secrets do kubernetes, suas vantagens, a maneira que podem ser utilizados, 
+podendo se através de volumes ou de variáveis de ambiente, e suas desvantagens, tais 
+como: a falta de criptografia e a possibilidade de recuperar os valores armazenados;
+
+Como criar os segredos do Kubernetes utilizando comandos do kubectl e já integrando 
+esses comandos na rotina;
+
+A obter informações automaticamente do Terraform, e assim automatizar o preenchimento 
+do endereço do banco de dados na rotina.
