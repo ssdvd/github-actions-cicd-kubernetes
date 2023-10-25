@@ -1,0 +1,71 @@
+iniciando a aplicacao:
+
+para iniciarmos a aplicacao usando o kubenetes na instancia criada pelo o github actions,
+podemos adicionar o seguinte comando na rotina eks.yml:
+
+
+- run: kubectl apply -f Infra_CI_Kubernetes/go.yaml
+
+assim como no terraform, o apply funciona de maneira semelhante porem temos que executar
+demonstrando o caminho do arquivo com o parametro -f. assim o comando sera executado.
+Lembrando que e altamente recomendado executar esse comando depois da criacao das
+secrets do kubectl.
+
+atualizando segredos:
+
+mas ao executar dessa forma, caso ja tenhamos executado antes a rotina retornara um 
+erro, pois estara constando que ja temos uma secrets com aquele nome, e para solucionar
+isso temos duas opcoes, uma e editar a secrets e outra que e mais rapido porem menos
+elegante, e a de apagar a secrets e colocar um parametro para ignora caso o kubectl 
+nao encontrar a variavel, assim nao acarretara em erro durante a execucao da rotina.
+e em seguida executar os comandos para criar novamente as variaveis. e para fazer
+isso podemos:
+
+      - run: kubectl delete secret dbhost --ignore-not-found
+      - run: kubectl create secret generic dbhost --from-literal=HOST=${{steps.URL.outputs.stdout}}
+
+vamos criar um comando de delete para cada secret, assim se caso houver algum erro 
+em alguma secret, sera mais facil de visualizar no log de erro da rotina. tambem 
+podemos observar que no comando para delete ha um argumento --integrando-not-found
+esse argumento serve para sinalizar que se o comando de deletar a secret nao encontrar
+a secret que estamos passando, ele vai ignorar e vai continuar com os comandos seguintes
+das rotinas.
+
+Atualizando a aplicacao:
+
+antes, notamos que para a criacao do imagem do container para o kubernetes esta travada
+no repo de infra, podemos observar no arquivo go.yaml, que a imagem usada contem uma
+versao fixa, e que toda vez que ela atualizar, teriamos que mudar manualmente no arquivo
+o que nao e uma boa pratica. e para resolver isso podemos usar o comando SED do linux 
+para realizar a substituicao da linha do arquivo go.yaml, mas isso tambem nao e uma
+boa pratica. Por conta disso existe um comando dentro do proprio kubectl em que podemos
+alterar a imagem do container usado no arquivo go.yaml, da seguinte forma:
+
+      - run: kubectl set image deployment/go-api go=ssdvd/go_ci:${{github.run_number}}
+
+agora vamos separar esse comando por partes para podermos entender, 
+
+em kubectl set image, estamos dizendo que iremos modificar uma imagem 
+
+em deployment/go-api , estamos dizendo que no arquivo que sinalizamos go.yaml na parte 
+de deployment o nome e go-api, que e onde iremos realizar a alteracao
+
+em go=ssdvd/go_ci:${{github.run_number}}, estamos colocando o local da imagem atualizada
+da nossa aplicacao, podemos ver ela na nossa rotina do docker.yml
+
+feito isso, teremos nossa aplicacao disponivel utilizando um cluster gerenciado pelo 
+eks e 100% funcional, com alta disponibilidade e escalavel. e para acessarmos a 
+aplicacao, podemos ir na aba do ec2, em load balancer e pegar o dns do mesmo e 
+colocamos no navegador para podermos acessar diretamente, nao esquece de colocar a 
+porta do app.
+
+Nessa aula, você aprendeu como:
+
+Colocar a aplicação no cluster do kubernetes, e permitir assim a execução dos 
+containers com a aplicação;
+
+Modificar os segredos através da rotina, apagando-os e em seguida criando-os 
+novamente, e evitando o erro de criar um segredo que já existe;
+
+Alterar a versão da aplicação no cluster, e possibilitar assim a sua atualização e 
+utilizando a versão mais recente.
