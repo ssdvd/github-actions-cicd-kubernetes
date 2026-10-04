@@ -50,7 +50,6 @@ jobs:
           echo "    @task(1)" >> locustfile.py
           echo "    def index(self):" >> locustfile.py
           echo '        self.client.get("/leo")' >> locustfile.py
-          echo "E7LVU0jBmvj4BICVg2sapwU6rSS91IU/2WHT6vw2" >> locustfile.py
           echo "class WebsiteUser(HttpUser):" >> locustfile.py
           echo "    tasks = [UserTasks]" >> locustfile.py
           echo "    wait_time = between(1, 5)" >> locustfile.py
